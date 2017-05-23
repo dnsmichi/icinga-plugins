@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#The plugin checks the system for process crashes and reports the same
+
+mapfile -t lines < <(ls -1  /var/crash/ | grep '.crash')
+C=0
+W=0
+for (( i=0; i<${#lines[@]}; i++ ))
+do 
+	process=$(sudo cat /var/crash/${lines[i]} | grep ExecutablePath | awk -F '/' '{print $NF}')	
+        time=$(ls -l  /var/crash/ | grep ${lines[i]} | awk '{print $6,$7,$8}') 
+	count=$(ps -eaf | grep $process | wc -l)
+	if [ $count -eq 1 ]; then
+		echo "$process crashed on $time; current state: down"
+		(( C++ ))
+	else
+		echo "$process crashed on $time; current state: up"
+		(( W++ ))
+	fi	
+
+done
+
+if [ $C -gt 0 ]; then
+	exit 2
+
+elif [ $W -gt 0 ]; then
+	exit 1
+
+else
+	echo "No crash reports"
+fi
