@@ -73,11 +73,22 @@ my $rings = $np->opts->rings;
 open( $fh, "$sudo $cfgtool |" )
   or $np->nagios_exit( CRITICAL, "Running corosync-cfgtool failed" );
 
+my $current_ring;
 foreach my $line (<$fh>) {
+    # RING ID 0
+    # LINK ID 0
+    if ( $line =~ m/^(?:RING|LINK) ID (\d+)/ ) {
+        $current_ring = $1;
+    }
+
     if ( $line =~ m/status\s*=\s*(\S.+)/ ) {
         my $status = $1;
-        if ( $status =~ m/^ring (\d+) active with no faults/ ) {
-            $np->add_message( OK, "ring $1 OK" );
+        if ( $status =~ m/^ring (\d+) active with no faults|OK/ ) {
+            if (!defined $current_ring && defined $1) {
+                $current_ring = $1;
+            }
+
+            $np->add_message( OK, "ring $current_ring OK" );
         }
         else {
             $np->add_message( CRITICAL, $status );
