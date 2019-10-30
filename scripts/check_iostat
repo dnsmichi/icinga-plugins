@@ -74,9 +74,9 @@ warn_written=`echo $warning | cut -d, -f3`
 #   -k: kilobytes
 # first run of iostat shows statistics since last reboot, second one shows current vaules of hdd
 # Doing the actual check:
-tps=`$iostat $disk -m -d 1 2 | grep $disk | awk '{print $2}'`
-read=`$iostat $disk -m -d 1 2| grep $disk | awk '{print $3}'`
-written=`$iostat $disk -m -d 1 2 | grep $disk | awk '{print $4}'`
+tps=`$iostat $disk -m -d 1 2 | grep "\b$disk\b" | awk '{print $2}'`
+read=`$iostat $disk -m -d 1 2| grep "\b$disk\b" | awk '{print $3}'`
+written=`$iostat $disk -m -d 1 2 | grep "\b$disk\b" | awk '{print $4}'`
 
 
 #fixing bug to display current values and not average values until last reboot
